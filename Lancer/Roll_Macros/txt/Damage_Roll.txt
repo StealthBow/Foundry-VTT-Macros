@@ -1,0 +1,73 @@
+//Form Defaults, modify as required.
+let formTitle = "Damage Roll"; //Default title for pop-up.
+let numDiceDefault = 1; //Default number of dice to roll.
+let diceTypeDefault = "d3"; //(d3/d6) Default type of dice in drop-down menu.
+let modDefault = 0; //Default damage modifier.
+let critDefault = false; //(true/false) Default to ticking crit or not.
+let damageDetailsDefault = "Damage"; //Extra notes section (e.g. "Kinetic Damage, AP"). This will appear above the dice roll in chat.
+
+
+
+//Script below here.
+let run = false;
+new Dialog({
+  title: `${formTitle}`,
+  content: `
+    <form>
+      <div class="form-group">
+        <label>Number of Dice:</label>
+        <input type="number" id="num-dice-input" name="num-dice-input" value="${numDiceDefault}"/>
+      </div>
+      <div class="form-group">
+        <label>Type:</label>
+        <select id="type-input" name="type-input">
+          <option value="d3"` + ((diceTypeDefault == "d3") ? ` selected` : ``) + `>d3</option>
+          <option value="d6"` + ((diceTypeDefault == "d6") ? ` selected` : ``) + `>d6</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Modifier:</label>
+        <input type="number" id="mod-input" name="mod-input" value="${modDefault}"/>
+      </div>
+      <div class="form-group">
+        <label>Crit?</label>
+        <input type="checkbox" id="crit-input" name="crit-input"` + (critDefault ? ` checked` : ``) + `/>
+      </div>
+      <div class="form-group">
+        <label>Damage Details:</label>
+        <input type="text" id="dmgDet-input" name="dmgDet-input" value="${damageDetailsDefault}"/>
+      </div>
+    </form>
+    `,
+  buttons: {
+    yes: {
+      icon: "<i class='fas fa-check'></i>",
+      label: `Roll!`,
+      callback: () => run = true
+    },
+    no: {
+      icon: "<i class='fas fa-times'></i>",
+      label: `Cancel`
+    },
+  },
+  default: "yes",
+  close: html => {
+    if (run) {
+      let numDice = html.find('[name="num-dice-input"]')[0].value;
+      let diceType = html.find('[name="type-input"]')[0].value;
+      let mod = html.find('[name="mod-input"]')[0].value;
+      let crit = html.find('[name="crit-input"]')[0].checked;
+      let damageDetails = html.find('[name="dmgDet-input"]')[0].value;
+      let damageRollFormula = `${diceType}`;
+      if (crit) {
+        damageRollFormula = `(2*${numDice})` + damageRollFormula + `kh${numDice}`;
+      } else {
+        damageRollFormula = `${numDice}` + damageRollFormula;
+      }
+      if (mod != 0) { damageRollFormula += `+${mod}`; }
+      
+      let damageDealt = new Roll(damageRollFormula).roll();
+      damageDealt.toMessage({flavor: damageDetails});
+    }
+  }
+}).render(true);

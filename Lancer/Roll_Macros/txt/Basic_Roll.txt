@@ -1,0 +1,59 @@
+//Form Defaults, modify as required.
+let formTitle = `Basic Roll`; //Default name for pop-up.
+let accDefault = 0; //Default Accuracy (e.g. Accurate Tag).
+let difDefault = 0; //Default Difficulty (e.g. Inaccurate Tag).
+let modDefault = 0; //Default Modifier (e.g. Grit or Skill triggers).
+let rollDetailsDefault = ""; //Extra notes for the roll (e.g. "Tech Attack"). This will appear above the dice roll in chat.
+
+
+
+//Script below here.
+let run = false;
+new Dialog({
+  title: `${formTitle}`,
+  content: `
+    <form>
+      <div class="form-group">
+        <label>Accuracy:</label>
+        <input type="number" id="acc-input" name="acc-input" title="Dice to roll for Accuracy." value="${accDefault}"/>
+      </div>
+      <div class="form-group">
+        <label>Difficulty:</label>
+        <input type="number" id="dif-input" name="dif-input" title="Dice to roll for Difficulty."  value="${difDefault}"/>
+      </div>
+      <div class="form-group">
+        <label>Modifier:</label>
+        <input type="number" id="mod-input" name="mod-input" title="e.g. Grit"  value="${modDefault}"/>
+      </div>
+      <div class="form-group">
+        <label>Roll Details:</label>
+        <input type="text" id="rolDet-input" name="rolDet-input" title="e.g. Tech Attack"  value="${rollDetailsDefault}"/>
+      </div>
+    </form>
+    `,
+  buttons: {
+    yes: {
+      icon: "<i class='fas fa-check'></i>",
+      label: `Roll!`,
+      callback: () => run = true
+    },
+    no: {
+      icon: "<i class='fas fa-times'></i>",
+      label: `Cancel`
+    },
+  },
+  default: "yes",
+  close: html => {
+    if (run) {
+      let accDif = (html.find('[name="acc-input"]')[0].value) - (html.find('[name="dif-input"]')[0].value);
+      let mod = html.find('[name="mod-input"]')[0].value;
+      let rollDetails = html.find('[name="rolDet-input"]')[0].value;
+      let basicRollFormula = `d20`;
+      if (accDif != 0) { basicRollFormula += `+${accDif}d6kh` }
+      if (mod != 0) { basicRollFormula += `+${mod}`; }
+      
+      let basicRoll = new Roll(basicRollFormula).roll();
+      basicRoll.toMessage({flavor: rollDetails});
+    }
+  }
+}).render(true);

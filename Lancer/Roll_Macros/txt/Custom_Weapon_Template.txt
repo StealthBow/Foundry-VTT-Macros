@@ -1,0 +1,77 @@
+//Form Defaults, modify as required.
+let formTitle = "Attack & Damage Roll"; //Default title for pop-up.
+let accDefault = 0; //Default Accuracy (e.g. Accurate Tag).
+let difDefault = 0; //Default Difficulty (e.g. Inaccurate Tag).
+
+//Pilot Details, modify as required.
+let grit = 0; //Pilot GRIT.
+let brutalTalent = false; //(true/false) When rolling nat 20 and getting a crit, roll max damage.
+
+//Weapon Details, modify as required.
+let numDice = 1; //Number of dice a weapon uses for damage, e.g. Assault Rifle uses 1d6.
+let diceType = "d6"; //Type of dice for damage.
+let damageMod = 0; //Any +/- bonuses to damage.
+let damageDetails = "Kinetic Damage, Reliable 2"; //(e.g. "Kinetic Damage, AP"). This will appear above the damage roll in chat.
+
+//Other Details, modify as required.
+let rollDetails = "Assault Rifle Attack"; //(e.g. "Tech Attack"). This will appear above the main roll in chat.
+
+
+
+//Script below here.
+let run = false;
+new Dialog({
+  title: `${formTitle}`,
+  content: `
+    <form>
+      <div class="form-group">
+        <label>Accuracy:</label>
+        <input type="number" id="acc-input" name="acc-input" value="${accDefault}"/>
+      </div>
+      <div class="form-group">
+        <label>Difficulty:</label>
+        <input type="number" id="dif-input" name="dif-input" value="${difDefault}"/>
+      </div>
+    </form>
+    `,
+  buttons: {
+    yes: {
+      icon: "<i class='fas fa-check'></i>",
+      label: `Roll!`,
+      callback: () => run = true
+    },
+    no: {
+      icon: "<i class='fas fa-times'></i>",
+      label: `Cancel`
+    },
+  },
+  default: "yes",
+  close: html => {
+    if (run) {
+      let accDif = (html.find('[name="acc-input"]')[0].value) - (html.find('[name="dif-input"]')[0].value);
+
+      let attackRollFormula = `d20`;
+      if (accDif != 0){ attackRollFormula += `+${accDif}d6kh`; }
+      if (grit != 0) {attackRollFormula += `+${grit}` };
+
+      let attack = new Roll(attackRollFormula);
+      attack.roll().toMessage({flavor: rollDetails});
+
+      let damageRollFormula = ``;
+      if (attack.total >= 20) {
+        if (brutalTalent && (attack.parts[0].results[0] == 20)) {
+          damageRollFormula = `(${numDice}*${diceType})`;
+        } else {
+          damageRollFormula = `(2*${numDice})${diceType}kh${numDice}`;
+        }
+      }
+      else {
+        damageRollFormula = `${numDice}${diceType}`;
+      }
+      if (damageMod !=0) {damageRollFormula += `+${damageMod}`}
+      
+      let damageDealt = new Roll(damageRollFormula).roll();
+      damageDealt.toMessage({flavor: damageDetails});
+    }
+  }
+}).render(true);
