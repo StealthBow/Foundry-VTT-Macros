@@ -41,3 +41,6 @@ This macro will roll both an "Basic" roll and a "Damage" roll, if the result of 
 Desired values can be set by editing the macro.
 Supports the Brutal Tier I Talent (Predator) for max dice-roll damage.
 Supports Overkill.
+
+Overkill in both macros provides the option to have the extra Heat damage taken by the user displayed as either a Maths-Roll or as a Chat Message.
+The Roll allows it to be easily hidden if desired by the Public/GM/etc. roll drop-down options.
