@@ -14,6 +14,8 @@ The form has input for:
 - A Modifier (e.g. Pilot GRIT).
 - Notes to add as Flavor text to the roll in chat (e.g. "Tech Attack").
 
+There are a few defaults that can be set to customise the input form, these are listed at the top of the macro.
+
 #### Damage Roll:
 
 Default values can be set at the top of the macro script, to allow for customisation (e.g. creating a custom Damage roll).
@@ -23,7 +25,10 @@ The form has input for:
 - Type of dice (d3/d6),
 - Damage Modifier,
 - Whether to treat the roll as a Critical hit,
+- Whether the weapon has the Overkill tag,
 - Notes  to add as Flavor text to the roll in chat (e.g. "Kinetic Damage, AP").
+
+There are a few defaults that can be set to customise the input form, these are listed at the top of the macro.
 
 #### Custom Weapon Template:
 
@@ -34,5 +39,5 @@ The form has input for:
 This macro will roll both an "Basic" roll and a "Damage" roll, if the result of the Attack is 20 or higher it will automatically roll the Damage with Critical hit rules.
 
 Desired values can be set by editing the macro.
-
 Supports the Brutal Tier I Talent (Predator) for max dice-roll damage.
+Supports Overkill.

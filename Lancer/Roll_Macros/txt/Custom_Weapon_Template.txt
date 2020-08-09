@@ -7,14 +7,17 @@ let difDefault = 0; //Default Difficulty (e.g. Inaccurate Tag).
 let grit = 0; //Pilot GRIT.
 let brutalTalent = false; //(true/false) When rolling nat 20 and getting a crit, roll max damage.
 
+//Attack Details, modify as required.
+let rollDetails = "Assault Rifle Attack"; //(e.g. "Tech Attack"). This will appear above the main roll in chat.
+
 //Weapon Details, modify as required.
 let numDice = 1; //Number of dice a weapon uses for damage, e.g. Assault Rifle uses 1d6.
-let diceType = "d6"; //Type of dice for damage.
+let diceType = "d3"; //Type of dice for damage (d3/d6).
 let damageMod = 0; //Any +/- bonuses to damage.
 let damageDetails = "Kinetic Damage, Reliable 2"; //(e.g. "Kinetic Damage, AP"). This will appear above the damage roll in chat.
+let overkill = false; //(true/false) Will re-roll 1's in damage and calculate how much heat you generated.
+let overkillMsgOrRoll = false; //(true/false) Whether the Overkill Heat displays as a Chat Message (false) or a Roll (true). 
 
-//Other Details, modify as required.
-let rollDetails = "Assault Rifle Attack"; //(e.g. "Tech Attack"). This will appear above the main roll in chat.
 
 
 
@@ -54,24 +57,33 @@ new Dialog({
       if (accDif != 0){ attackRollFormula += `+${accDif}d6kh`; }
       if (grit != 0) {attackRollFormula += `+${grit}` };
 
-      let attack = new Roll(attackRollFormula);
-      attack.roll().toMessage({flavor: rollDetails});
+      let attack = new Roll(attackRollFormula).roll();
 
       let damageRollFormula = ``;
       if (attack.total >= 20) {
         if (brutalTalent && (attack.parts[0].results[0] == 20)) {
-          damageRollFormula = `(${numDice}*${diceType})`;
+          damageRollFormula = `(${numDice}*${diceType[1]})`;
         } else {
-          damageRollFormula = `(2*${numDice})${diceType}kh${numDice}`;
+          damageRollFormula = `(2*${numDice})${diceType}`+(overkill ? `x1` : ``)+`kh${numDice}`;
         }
       }
       else {
-        damageRollFormula = `${numDice}${diceType}`;
+        damageRollFormula = `${numDice}${diceType}`+(overkill ? `x1kh${numDice}` : ``);
       }
-      if (damageMod !=0) {damageRollFormula += `+${damageMod}`}
+      if (damageMod != 0) {damageRollFormula += `+${damageMod}`}
       
       let damageDealt = new Roll(damageRollFormula).roll();
+      
+      let heat = 0;
+      if (overkill && !brutalTalent) { damageDealt.parts[0].rolls.forEach(d => { if (d.exploded) {++heat;} }) }
+            
+      attack.toMessage({flavor: rollDetails});
       damageDealt.toMessage({flavor: damageDetails});
+      
+      if (heat != 0) {
+        if (overkillMsgOrRoll) { new Roll(`${heat}`).roll().toMessage({flavor: `Overkill Heat`}) }
+        else { ChatMessage.create({content: `Overkill Heat: ${heat}`}, {}); }
+      }
     }
   }
 }).render(true);

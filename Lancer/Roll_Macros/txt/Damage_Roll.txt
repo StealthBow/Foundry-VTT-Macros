@@ -5,6 +5,8 @@ let diceTypeDefault = "d3"; //(d3/d6) Default type of dice in drop-down menu.
 let modDefault = 0; //Default damage modifier.
 let critDefault = false; //(true/false) Default to ticking crit or not.
 let damageDetailsDefault = "Damage"; //Extra notes section (e.g. "Kinetic Damage, AP"). This will appear above the dice roll in chat.
+let overkillDefault = false; //(true/false) Will re-roll 1's in damage and calculate how much heat you generated.
+let overkillMsgOrRoll = false; //(true/false) Whether the Overkill Heat displays as a Chat Message (false) or a Roll (true). 
 
 
 
@@ -34,6 +36,10 @@ new Dialog({
         <input type="checkbox" id="crit-input" name="crit-input"` + (critDefault ? ` checked` : ``) + `/>
       </div>
       <div class="form-group">
+        <label>Overkill?</label>
+        <input type="checkbox" id="ovk-input" name="ovk-input"` + (overkillDefault ? ` checked` : ``) + `/>
+      </div>
+      <div class="form-group">
         <label>Damage Details:</label>
         <input type="text" id="dmgDet-input" name="dmgDet-input" value="${damageDetailsDefault}"/>
       </div>
@@ -57,17 +63,27 @@ new Dialog({
       let diceType = html.find('[name="type-input"]')[0].value;
       let mod = html.find('[name="mod-input"]')[0].value;
       let crit = html.find('[name="crit-input"]')[0].checked;
+      let overkill = html.find('[name="ovk-input"]')[0].checked;
       let damageDetails = html.find('[name="dmgDet-input"]')[0].value;
-      let damageRollFormula = `${diceType}`;
+      let damageRollFormula = ``;
       if (crit) {
-        damageRollFormula = `(2*${numDice})` + damageRollFormula + `kh${numDice}`;
+        damageRollFormula = `(2*${numDice})${diceType}` + (overkill ? `x1` : ``) + `kh${numDice}`;
       } else {
-        damageRollFormula = `${numDice}` + damageRollFormula;
+        damageRollFormula = `${numDice}${diceType}` + (overkill ? `x1kh${numDice}` : ``);
       }
       if (mod != 0) { damageRollFormula += `+${mod}`; }
       
       let damageDealt = new Roll(damageRollFormula).roll();
+      
+      let heat = 0;
+      if (overkill) { damageDealt.parts[0].rolls.forEach(d => { if (d.exploded) {++heat;} }) }
+      
       damageDealt.toMessage({flavor: damageDetails});
+      
+      if (heat != 0) {
+        if (overkillMsgOrRoll) { new Roll(`${heat}`).roll().toMessage({flavor: `Overkill Heat`}) }
+        else { ChatMessage.create({content: `Overkill Heat: ${heat}`}, {}); }
+      }
     }
   }
 }).render(true);
