@@ -48,7 +48,7 @@ new Dialog({
       let accDif = (html.find('[name="acc-input"]')[0].value) - (html.find('[name="dif-input"]')[0].value);
       let mod = html.find('[name="mod-input"]')[0].value;
       let rollDetails = html.find('[name="rolDet-input"]')[0].value;
-      let basicRollFormula = `d20`;
+      let basicRollFormula = `1d20`;
       if (accDif != 0) { basicRollFormula += `+${accDif}d6kh` }
       if (mod != 0) { basicRollFormula += `+${mod}`; }
       

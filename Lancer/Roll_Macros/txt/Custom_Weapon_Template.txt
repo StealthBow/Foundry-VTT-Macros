@@ -53,7 +53,7 @@ new Dialog({
     if (run) {
       let accDif = (html.find('[name="acc-input"]')[0].value) - (html.find('[name="dif-input"]')[0].value);
 
-      let attackRollFormula = `d20`;
+      let attackRollFormula = `1d20`;
       if (accDif != 0){ attackRollFormula += `+${accDif}d6kh`; }
       if (grit != 0) {attackRollFormula += `+${grit}` };
 
